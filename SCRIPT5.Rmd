@@ -95,7 +95,7 @@ library(krvotes)
 
 ##데이터 수집
 성남의 지방자치단체 데이터를 수집한 것과 비슷한 방식으로 지역자치단체 및 정부에서 공개한 데이터를 기본으로 하고 더 필요하다면 구글링을 통해 정보를 수집하고자 한다. 
-
+ 
 ![](https://i.imgur.com/LF04Fhp.jpg)
 ![](https://i.imgur.com/BgQUNro.jpg)
 ![](https://i.imgur.com/VkueqOm.jpg)
