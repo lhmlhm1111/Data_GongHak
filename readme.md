@@ -1,5 +1,6 @@
 # 19-2 데이터공학 < 4딸라 >조
-![과목](https://img.shields.io/badge/%EA%B3%BC%EB%AA%A9-%EB%8D%B0%EC%9D%B4%ED%84%B0%EA%B3%B5%ED%95%99-blue)
+![과목](https://img.shields.io/badge/%EA%B3%BC%EB%AA%A9-%EB%8D%B0%EC%9D%B4%ED%84%B0%EA%B3%B5%ED%95%99-blue) ![교수](https://img.shields.io/badge/%EA%B5%90%EC%88%98-%EC%9D%B4%EA%B4%91%EC%B6%98-9cf)
+
 *조원: 이학민 최호식 김호성 이진원*
 
 > 프로젝트 주제
