@@ -1,5 +1,5 @@
 # 19-2 데이터공학 < 4딸라 >조
-![과목](https://img.shields.io/badge/%EA%B3%BC%EB%AA%A9-%EB%8D%B0%EC%9D%B4%ED%84%B0%EA%B3%B5%ED%95%99-blue) ![교수](https://img.shields.io/badge/%EA%B5%90%EC%88%98-%EC%9D%B4%EA%B4%91%EC%B6%98-9cf) ![조](https://img.shields.io/badge/%EC%A1%B0-4-orange) ![조원](https://img.shields.io/badge/%EC%A1%B0%EC%9B%90-%EC%9D%B4%ED%95%99%EB%AF%BC%20%EC%B5%9C%ED%98%B8%EC%8B%9D%20%EA%B9%80%ED%98%B8%EC%84%B1%20%EC%9D%B4%EC%A7%84%EC%9B%90-lightgrey) 
+![학기](https://img.shields.io/badge/%ED%95%99%EA%B8%B0-19--2-lightgrey) ![과목](https://img.shields.io/badge/%EA%B3%BC%EB%AA%A9-%EB%8D%B0%EC%9D%B4%ED%84%B0%EA%B3%B5%ED%95%99-blue) ![교수](https://img.shields.io/badge/%EA%B5%90%EC%88%98-%EC%9D%B4%EA%B4%91%EC%B6%98-9cf) ![조](https://img.shields.io/badge/%EC%A1%B0-4-red) ![조원](https://img.shields.io/badge/%EC%A1%B0%EC%9B%90-%EC%9D%B4%ED%95%99%EB%AF%BC%20%EC%B5%9C%ED%98%B8%EC%8B%9D%20%EA%B9%80%ED%98%B8%EC%84%B1%20%EC%9D%B4%EC%A7%84%EC%9B%90-yellow) 
 
 *조원: 이학민 최호식 김호성 이진원*
 
