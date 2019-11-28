@@ -1,0 +1,46 @@
+---
+title: "progress"
+author: "4$조"
+date: '2019 11 26 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 시작-데이터프레임불러오기 
+```{r}
+# 인코딩 문제를 해결하는 두가지 방법
+## 1 csv파일 인코딩을 ANSI로 저장
+df1=read.csv('소득반영최종.csv',header=T, sep=',')
+
+## 2 readAny 패키지 활용
+library(devtools)
+
+# 패키지를 로드합니다.
+install_github("plgrmr/readAny", force = TRUE)
+library(readAny)
+df2=read.any('C:/Users/bookair/Documents/GitHub/Data_GongHak/전처리/소득반영최종.csv', header=T, sep=',')
+
+
+```
+
+## 데이터프레임 선형모델, 분산 분석, 각 독립변수 유의수준
+
+```{r}
+attach(df2)
+names(df2)
+model1<-aov(새누리당~독거노인수+유년부양비+노령화지수+사업체수+기초수급자인원수+보육시설+금융기관+인구+면적+소득.동별.)
+summary(model1) # 표수로 계산
+model2<-aov((새누리당/(새누리당+더불어민주당+국민의당))~독거노인수+유년부양비+노령화지수+사업체수+기초수급자인원수+보육시설+금융기관+인구+면적+소득.동별.) # 득표 비율로 계산
+summary(model2)
+model3<-aov(새누리당~독거노인수+유년부양비+노년부양비+노령화지수+사업체수+종사자수+사업체.창업률+기초수급자인원수+보육시설+금융기관+사업체.평균연령+장애인등급별.장애인현황+인구+면적++인구밀도+소득.동별.)
+summary(model3)
+```
+
+# 다음
+
+
+ 
+ 
