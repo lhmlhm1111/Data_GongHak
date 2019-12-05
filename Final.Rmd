@@ -1,0 +1,143 @@
+---
+title: "Election"
+author: "4dollar"
+date: "2019년 12월 13일"
+output:
+  html_document: 
+    toc: yes
+    toc_float: true
+    highlight: tango
+    code_folding: show
+    number_section: true
+    self_contained: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 개요
+
+## 주제선정이유
+
+![2018서울총선결과](https://i.imgur.com/lbB3nd9.jpg)
+
+
+단순히 생각해도, 투표에 영향을 주는 요소는 무수히 많습니다. 
+
+그렇다면 '과연 어떠한 요소가 실질적으로 투표에 영향을 줄까?'
+
+이러한 의문으로 시작하여 저희 조는 투표에 영향을 줄 만한 변수들을 생각해봤고, 그 변수들을 이용하여 다음 총선을 예측해보기로 하였습니다. 
+
+
+## 데이터 수집과정
+
+
+정량적인 데이터를 사용해야 하기 때문에, 선거에 통용되는 통설들은 배제하고 수치화 할 수 있는 데이터들을 수집했습니다.
+
+
+```{r}
+data<-read.csv(file="2008_oldage.csv",header=TRUE,sep='',encoding='UTF-8')
+head(data) 
+```
+_데이터수집예시_
+
+
+비슷한 과정으로 수치화 할 수 있는 데이터를 최대한 수집했습니다.
+
+![데이터수집목록](https://i.imgur.com/SLc4MWk.png)
+
+데이터 수집은 [서울시열린데이터광장](https://data.seoul.go.kr)을 참고하였습니다.
+![서울시열린데이터광장](https://i.imgur.com/2QKAKy1.png)
+
+# 전처리과정
+
+앞서 모은 데이터들을 활용하기 위해서 전처리 하는 과정을 거쳤습니다.
+
+
+```{r}
+library(reticulate)
+path_to_python <- 'C:/Users/LEE/Anaconda3'
+use_python(path_to_python)
+knitr::knit_engines$set(python = reticulate::eng_python)
+py_available(initialize = TRUE)
+```
+
+```{python}
+import pandas as pd
+import numpy as np
+import os
+import re
+os.chdir('C:/Users/LEE/Desktop/presentation/data')
+filelist = os.listdir("seoul")[1:]
+
+gangnamgap = pd.read_excel("C:/Users/LEE/Desktop/presentation/data/seoul/개표상황(투표구별)_강남구갑.xlsx")
+header = gangnamgap.iloc[2,:4]
+
+a = pd.Series(gangnamgap.iloc[3,4:].values)
+
+a = a.apply(lambda x: str(x).split("\n")[0])
+
+a = a[(a!="")&(a!="nan")]
+
+gangnamgap = gangnamgap[gangnamgap['Unnamed: 1']=="소계"]
+gangnamgap = gangnamgap.iloc[:,:len(a)+3]
+gangnamgap.columns = np.append(header,a[:-1])
+gangnamgap.head()
+
+os.chdir('C:/Users/LEE/Desktop/presentation/data')
+first = gangnamgap
+gangnamgap['자치구'] = "강남구"
+for file in filelist:
+    data=pd.read_excel(f'seoul/{file}')
+    a=pd.Series(data.iloc[3,4:].values)
+    a = a.apply(lambda x: str(x).split("\n")[0])
+    a = a[(a!="")&(a!="nan")]
+    data = data[data['Unnamed: 1']=="소계"]
+    data = data.iloc[:,:len(a)+3]
+    data.columns = np.append(header,a[:-1])
+    gu = re.findall("_\w+구", file)[0][1:]
+    data['자치구'] = gu
+    first = first.append(data, sort=False)
+
+Second = first[["읍면동명","자치구", "선거인수", "새누리당", "더불어민주당", "국민의당"]]
+Second.읍면동명=Second.읍면동명.apply(lambda x: re.sub(r'제', '', str(x)))
+Second.읍면동명=Second.읍면동명.apply(lambda x: re.sub(r'·', '.', str(x)))
+
+old_man = pd.read_csv("C:/Users/LEE/Desktop/presentation/data/독립변수_데이터_호식/서울시 독거노인 현황 (성별,동별) 통계_2016.txt", engine="python" ,encoding="utf-8", sep="\t")
+
+old_man = old_man[["동", "자치구", "합계"]]
+old_man=old_man.rename(columns={"동": "읍면동명"})
+old_man = old_man.drop([0,1,2])
+
+old_man.자치구=old_man.자치구.apply(lambda x: re.sub(r'성동', '중', str(x)))
+old_man[old_man.자치구=="중구"]
+
+second_old_man = pd.merge(Second, old_man, how='left')
+second_old_man = second_old_man.rename(columns={"합계":"독거노인수"})
+
+buyang = pd.read_csv("C:/Users/LEE/Desktop/presentation/data/독립변수_데이터_호식/서울시 부양비 및 노령화지수 (동별) 통계_2016.txt", engine="python" ,encoding="utf-8", sep="\t")
+
+buyang = buyang.rename(columns={"동":"읍면동명"})
+buyang = buyang[~buyang.읍면동명.isin(["소계", "합계"])]
+buyang=buyang.drop("기간", axis=1)
+
+buyang.자치구=buyang.자치구.apply(lambda x: re.sub(r'성동', '중', str(x)))
+
+old_man_buyang=pd.merge(second_old_man, buyang, how='left')
+old_man_buyang.head()
+```
+
+비슷한 방식으로 다른 독립변수들도 모두 전처리를 해주었습니다.
+
+최종적으로 전처리 한 데이터의 모습입니다.
+```{r}
+data<-read.csv(file="1122.csv",header=TRUE,sep='',encoding='UTF-8')
+head(data) 
+```
+
+![최종전처리](https://i.imgur.com/wJRbSBN.png)
+
+
