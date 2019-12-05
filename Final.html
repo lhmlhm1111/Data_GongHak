@@ -1699,148 +1699,60 @@ div.tocify {
 <a class="sourceLine" id="cb5-3" title="3"><span class="im">import</span> os</a>
 <a class="sourceLine" id="cb5-4" title="4"><span class="im">import</span> re</a>
 <a class="sourceLine" id="cb5-5" title="5">os.chdir(<span class="st">&#39;C:/Users/LEE/Desktop/presentation/data&#39;</span>)</a>
-<a class="sourceLine" id="cb5-6" title="6">filelist <span class="op">=</span> os.listdir(<span class="st">&quot;seoul&quot;</span>)[<span class="dv">1</span>:]</a></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb6-1" title="1">gangnamgap <span class="op">=</span> pd.read_excel(<span class="st">&quot;C:/Users/LEE/Desktop/presentation/data/seoul/개표상황(투표구별)_강남구갑.xlsx&quot;</span>)</a>
-<a class="sourceLine" id="cb6-2" title="2">header <span class="op">=</span> gangnamgap.iloc[<span class="dv">2</span>,:<span class="dv">4</span>]</a>
-<a class="sourceLine" id="cb6-3" title="3">header</a></code></pre></div>
-<pre><code>## 개표상황(투표구별)    읍면동명
-## Unnamed: 1    투표구명
-## Unnamed: 2    선거인수
-## Unnamed: 3     투표수
-## Name: 2, dtype: object</code></pre>
-<div class="sourceCode" id="cb8"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb8-1" title="1">a <span class="op">=</span> pd.Series(gangnamgap.iloc[<span class="dv">3</span>,<span class="dv">4</span>:].values)</a>
-<a class="sourceLine" id="cb8-2" title="2">a</a></code></pre></div>
-<pre><code>## 0       새누리당\n이종구
-## 1     더불어민주당\n김성곤
-## 2              \n
-## 3              \n
-## 4              \n
-## 5              \n
-## 6              \n
-## 7              \n
-## 8              \n
-## 9              \n
-## 10             \n
-## 11             \n
-## 12             \n
-## 13             \n
-## 14             \n
-## 15             \n
-## 16             \n
-## 17             \n
-## 18             \n
-## 19             \n
-## 20             \n
-## 21              계
-## 22            NaN
-## 23            NaN
-## 24            NaN
-## dtype: object</code></pre>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb10-1" title="1">a <span class="op">=</span> a.<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="bu">str</span>(x).split(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)[<span class="dv">0</span>])</a>
-<a class="sourceLine" id="cb10-2" title="2">a</a></code></pre></div>
-<pre><code>## 0       새누리당
-## 1     더불어민주당
-## 2           
-## 3           
-## 4           
-## 5           
-## 6           
-## 7           
-## 8           
-## 9           
-## 10          
-## 11          
-## 12          
-## 13          
-## 14          
-## 15          
-## 16          
-## 17          
-## 18          
-## 19          
-## 20          
-## 21         계
-## 22       nan
-## 23       nan
-## 24       nan
-## dtype: object</code></pre>
-<div class="sourceCode" id="cb12"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb12-1" title="1">a <span class="op">=</span> a[(a<span class="op">!=</span><span class="st">&quot;&quot;</span>)<span class="op">&amp;</span>(a<span class="op">!=</span><span class="st">&quot;nan&quot;</span>)]</a>
-<a class="sourceLine" id="cb12-2" title="2">a</a></code></pre></div>
-<pre><code>## 0       새누리당
-## 1     더불어민주당
-## 21         계
-## dtype: object</code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb14-1" title="1">gangnamgap <span class="op">=</span> gangnamgap[gangnamgap[<span class="st">&#39;Unnamed: 1&#39;</span>]<span class="op">==</span><span class="st">&quot;소계&quot;</span>]</a>
-<a class="sourceLine" id="cb14-2" title="2">gangnamgap.head()</a></code></pre></div>
-<pre><code>##    개표상황(투표구별) Unnamed: 1 Unnamed: 2  ... Unnamed: 26 Unnamed: 27 Unnamed: 28
-## 9         신사동         소계      14827  ...         180        7056         NaN
-## 16       논현1동         소계      21876  ...         204       12937         NaN
-## 23       논현2동         소계      19063  ...         231       10176         NaN
-## 30       압구정동         소계      22435  ...         278       10317         NaN
-## 39        청담동         소계      24507  ...         327       12037         NaN
-## 
-## [5 rows x 29 columns]</code></pre>
-<div class="sourceCode" id="cb16"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb16-1" title="1">gangnamgap <span class="op">=</span> gangnamgap.iloc[:,:<span class="bu">len</span>(a)<span class="op">+</span><span class="dv">3</span>]</a>
-<a class="sourceLine" id="cb16-2" title="2">gangnamgap.columns <span class="op">=</span> np.append(header,a[:<span class="op">-</span><span class="dv">1</span>])</a>
-<a class="sourceLine" id="cb16-3" title="3">gangnamgap.head()</a></code></pre></div>
+<a class="sourceLine" id="cb5-6" title="6">filelist <span class="op">=</span> os.listdir(<span class="st">&quot;seoul&quot;</span>)[<span class="dv">1</span>:]</a>
+<a class="sourceLine" id="cb5-7" title="7"></a>
+<a class="sourceLine" id="cb5-8" title="8">gangnamgap <span class="op">=</span> pd.read_excel(<span class="st">&quot;C:/Users/LEE/Desktop/presentation/data/seoul/개표상황(투표구별)_강남구갑.xlsx&quot;</span>)</a>
+<a class="sourceLine" id="cb5-9" title="9">header <span class="op">=</span> gangnamgap.iloc[<span class="dv">2</span>,:<span class="dv">4</span>]</a>
+<a class="sourceLine" id="cb5-10" title="10"></a>
+<a class="sourceLine" id="cb5-11" title="11">a <span class="op">=</span> pd.Series(gangnamgap.iloc[<span class="dv">3</span>,<span class="dv">4</span>:].values)</a>
+<a class="sourceLine" id="cb5-12" title="12"></a>
+<a class="sourceLine" id="cb5-13" title="13">a <span class="op">=</span> a.<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="bu">str</span>(x).split(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)[<span class="dv">0</span>])</a>
+<a class="sourceLine" id="cb5-14" title="14"></a>
+<a class="sourceLine" id="cb5-15" title="15">a <span class="op">=</span> a[(a<span class="op">!=</span><span class="st">&quot;&quot;</span>)<span class="op">&amp;</span>(a<span class="op">!=</span><span class="st">&quot;nan&quot;</span>)]</a>
+<a class="sourceLine" id="cb5-16" title="16"></a>
+<a class="sourceLine" id="cb5-17" title="17">gangnamgap <span class="op">=</span> gangnamgap[gangnamgap[<span class="st">&#39;Unnamed: 1&#39;</span>]<span class="op">==</span><span class="st">&quot;소계&quot;</span>]</a>
+<a class="sourceLine" id="cb5-18" title="18">gangnamgap <span class="op">=</span> gangnamgap.iloc[:,:<span class="bu">len</span>(a)<span class="op">+</span><span class="dv">3</span>]</a>
+<a class="sourceLine" id="cb5-19" title="19">gangnamgap.columns <span class="op">=</span> np.append(header,a[:<span class="op">-</span><span class="dv">1</span>])</a>
+<a class="sourceLine" id="cb5-20" title="20">gangnamgap.head()</a></code></pre></div>
 <pre><code>##     읍면동명 투표구명   선거인수    투표수  새누리당 더불어민주당
 ## 9    신사동   소계  14827   7771  4774   2817
 ## 16  논현1동   소계  21876   8939  3966   4769
 ## 23  논현2동   소계  19063   8887  4639   4017
 ## 30  압구정동   소계  22435  12118  8301   3539
 ## 39   청담동   소계  24507  12470  7366   4777</code></pre>
-<div class="sourceCode" id="cb18"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb18-1" title="1">os.chdir(<span class="st">&#39;C:/Users/LEE/Desktop/presentation/data&#39;</span>)</a>
-<a class="sourceLine" id="cb18-2" title="2">first <span class="op">=</span> gangnamgap</a>
-<a class="sourceLine" id="cb18-3" title="3">gangnamgap[<span class="st">&#39;자치구&#39;</span>] <span class="op">=</span> <span class="st">&quot;강남구&quot;</span></a>
-<a class="sourceLine" id="cb18-4" title="4"><span class="cf">for</span> <span class="bu">file</span> <span class="kw">in</span> filelist:</a>
-<a class="sourceLine" id="cb18-5" title="5">    data<span class="op">=</span>pd.read_excel(<span class="ss">f&#39;seoul/</span><span class="sc">{</span><span class="bu">file</span><span class="sc">}</span><span class="ss">&#39;</span>)</a>
-<a class="sourceLine" id="cb18-6" title="6">    a<span class="op">=</span>pd.Series(data.iloc[<span class="dv">3</span>,<span class="dv">4</span>:].values)</a>
-<a class="sourceLine" id="cb18-7" title="7">    a <span class="op">=</span> a.<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="bu">str</span>(x).split(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)[<span class="dv">0</span>])</a>
-<a class="sourceLine" id="cb18-8" title="8">    a <span class="op">=</span> a[(a<span class="op">!=</span><span class="st">&quot;&quot;</span>)<span class="op">&amp;</span>(a<span class="op">!=</span><span class="st">&quot;nan&quot;</span>)]</a>
-<a class="sourceLine" id="cb18-9" title="9">    data <span class="op">=</span> data[data[<span class="st">&#39;Unnamed: 1&#39;</span>]<span class="op">==</span><span class="st">&quot;소계&quot;</span>]</a>
-<a class="sourceLine" id="cb18-10" title="10">    data <span class="op">=</span> data.iloc[:,:<span class="bu">len</span>(a)<span class="op">+</span><span class="dv">3</span>]</a>
-<a class="sourceLine" id="cb18-11" title="11">    data.columns <span class="op">=</span> np.append(header,a[:<span class="op">-</span><span class="dv">1</span>])</a>
-<a class="sourceLine" id="cb18-12" title="12">    gu <span class="op">=</span> re.findall(<span class="st">&quot;_\w+구&quot;</span>, <span class="bu">file</span>)[<span class="dv">0</span>][<span class="dv">1</span>:]</a>
-<a class="sourceLine" id="cb18-13" title="13">    data[<span class="st">&#39;자치구&#39;</span>] <span class="op">=</span> gu</a>
-<a class="sourceLine" id="cb18-14" title="14">    first <span class="op">=</span> first.append(data, sort<span class="op">=</span><span class="va">False</span>)</a></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb19-1" title="1">Second <span class="op">=</span> first[[<span class="st">&quot;읍면동명&quot;</span>,<span class="st">&quot;자치구&quot;</span>, <span class="st">&quot;선거인수&quot;</span>, <span class="st">&quot;새누리당&quot;</span>, <span class="st">&quot;더불어민주당&quot;</span>, <span class="st">&quot;국민의당&quot;</span>]]</a>
-<a class="sourceLine" id="cb19-2" title="2">Second.읍면동명<span class="op">=</span>Second.읍면동명.<span class="bu">apply</span>(<span class="kw">lambda</span> x: re.sub(<span class="vs">r&#39;제&#39;</span>, <span class="st">&#39;&#39;</span>, <span class="bu">str</span>(x)))</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb7-1" title="1">os.chdir(<span class="st">&#39;C:/Users/LEE/Desktop/presentation/data&#39;</span>)</a>
+<a class="sourceLine" id="cb7-2" title="2">first <span class="op">=</span> gangnamgap</a>
+<a class="sourceLine" id="cb7-3" title="3">gangnamgap[<span class="st">&#39;자치구&#39;</span>] <span class="op">=</span> <span class="st">&quot;강남구&quot;</span></a>
+<a class="sourceLine" id="cb7-4" title="4"><span class="cf">for</span> <span class="bu">file</span> <span class="kw">in</span> filelist:</a>
+<a class="sourceLine" id="cb7-5" title="5">    data<span class="op">=</span>pd.read_excel(<span class="ss">f&#39;seoul/</span><span class="sc">{</span><span class="bu">file</span><span class="sc">}</span><span class="ss">&#39;</span>)</a>
+<a class="sourceLine" id="cb7-6" title="6">    a<span class="op">=</span>pd.Series(data.iloc[<span class="dv">3</span>,<span class="dv">4</span>:].values)</a>
+<a class="sourceLine" id="cb7-7" title="7">    a <span class="op">=</span> a.<span class="bu">apply</span>(<span class="kw">lambda</span> x: <span class="bu">str</span>(x).split(<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)[<span class="dv">0</span>])</a>
+<a class="sourceLine" id="cb7-8" title="8">    a <span class="op">=</span> a[(a<span class="op">!=</span><span class="st">&quot;&quot;</span>)<span class="op">&amp;</span>(a<span class="op">!=</span><span class="st">&quot;nan&quot;</span>)]</a>
+<a class="sourceLine" id="cb7-9" title="9">    data <span class="op">=</span> data[data[<span class="st">&#39;Unnamed: 1&#39;</span>]<span class="op">==</span><span class="st">&quot;소계&quot;</span>]</a>
+<a class="sourceLine" id="cb7-10" title="10">    data <span class="op">=</span> data.iloc[:,:<span class="bu">len</span>(a)<span class="op">+</span><span class="dv">3</span>]</a>
+<a class="sourceLine" id="cb7-11" title="11">    data.columns <span class="op">=</span> np.append(header,a[:<span class="op">-</span><span class="dv">1</span>])</a>
+<a class="sourceLine" id="cb7-12" title="12">    gu <span class="op">=</span> re.findall(<span class="st">&quot;_\w+구&quot;</span>, <span class="bu">file</span>)[<span class="dv">0</span>][<span class="dv">1</span>:]</a>
+<a class="sourceLine" id="cb7-13" title="13">    data[<span class="st">&#39;자치구&#39;</span>] <span class="op">=</span> gu</a>
+<a class="sourceLine" id="cb7-14" title="14">    first <span class="op">=</span> first.append(data, sort<span class="op">=</span><span class="va">False</span>)</a>
+<a class="sourceLine" id="cb7-15" title="15"></a>
+<a class="sourceLine" id="cb7-16" title="16">Second <span class="op">=</span> first[[<span class="st">&quot;읍면동명&quot;</span>,<span class="st">&quot;자치구&quot;</span>, <span class="st">&quot;선거인수&quot;</span>, <span class="st">&quot;새누리당&quot;</span>, <span class="st">&quot;더불어민주당&quot;</span>, <span class="st">&quot;국민의당&quot;</span>]]</a>
+<a class="sourceLine" id="cb7-17" title="17">Second.읍면동명<span class="op">=</span>Second.읍면동명.<span class="bu">apply</span>(<span class="kw">lambda</span> x: re.sub(<span class="vs">r&#39;제&#39;</span>, <span class="st">&#39;&#39;</span>, <span class="bu">str</span>(x)))</a></code></pre></div>
 <pre><code>## C:\Users\LEE\ANACON~1\lib\site-packages\pandas\core\generic.py:5208: SettingWithCopyWarning: 
 ## A value is trying to be set on a copy of a slice from a DataFrame.
 ## Try using .loc[row_indexer,col_indexer] = value instead
 ## 
 ## See the caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
 ##   self[name] = value</code></pre>
-<div class="sourceCode" id="cb21"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb21-1" title="1">Second.읍면동명<span class="op">=</span>Second.읍면동명.<span class="bu">apply</span>(<span class="kw">lambda</span> x: re.sub(<span class="vs">r&#39;·&#39;</span>, <span class="st">&#39;.&#39;</span>, <span class="bu">str</span>(x)))</a>
-<a class="sourceLine" id="cb21-2" title="2">Second.head()</a></code></pre></div>
-<pre><code>##     읍면동명  자치구   선거인수  새누리당 더불어민주당 국민의당
-## 9    신사동  강남구  14827  4774   2817  NaN
-## 16  논현1동  강남구  21876  3966   4769  NaN
-## 23  논현2동  강남구  19063  4639   4017  NaN
-## 30  압구정동  강남구  22435  8301   3539  NaN
-## 39   청담동  강남구  24507  7366   4777  NaN</code></pre>
-<div class="sourceCode" id="cb23"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb23-1" title="1">old_man <span class="op">=</span> pd.read_csv(<span class="st">&quot;C:/Users/LEE/Desktop/presentation/data/독립변수_데이터_호식/서울시 독거노인 현황 (성별,동별) 통계_2016.txt&quot;</span>, engine<span class="op">=</span><span class="st">&quot;python&quot;</span> ,encoding<span class="op">=</span><span class="st">&quot;utf-8&quot;</span>, sep<span class="op">=</span><span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)</a>
-<a class="sourceLine" id="cb23-2" title="2">old_man.head()</a></code></pre></div>
-<pre><code>##      기간  자치구    동       합계   합계.1  ... 저소득노인.1 저소득노인.2       일반   일반.1   일반.2
-## 0    기간  자치구    동        계      남  ...       남       여        계      남      여
-## 1  2016   합계   합계  288,599      …  ...       …       …  220,967      …      …
-## 2  2016  종로구   소계    7,074  2,811  ...      97     180    5,608  2,130  3,478
-## 3  2016  종로구  사직동      383    132  ...       7       5      333    113    220
-## 4  2016  종로구  삼청동      156     49  ...       -       4      135     44     91
-## 
-## [5 rows x 15 columns]</code></pre>
-<div class="sourceCode" id="cb25"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb25-1" title="1">old_man <span class="op">=</span> old_man[[<span class="st">&quot;동&quot;</span>, <span class="st">&quot;자치구&quot;</span>, <span class="st">&quot;합계&quot;</span>]]</a>
-<a class="sourceLine" id="cb25-2" title="2">old_man<span class="op">=</span>old_man.rename(columns<span class="op">=</span>{<span class="st">&quot;동&quot;</span>: <span class="st">&quot;읍면동명&quot;</span>})</a>
-<a class="sourceLine" id="cb25-3" title="3">old_man <span class="op">=</span> old_man.drop([<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>])</a>
-<a class="sourceLine" id="cb25-4" title="4">old_man.head()</a></code></pre></div>
-<pre><code>##   읍면동명  자치구   합계
-## 3  사직동  종로구  383
-## 4  삼청동  종로구  156
-## 5  부암동  종로구  319
-## 6  평창동  종로구  615
-## 7  무악동  종로구  205</code></pre>
-<div class="sourceCode" id="cb27"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb27-1" title="1">old_man.자치구<span class="op">=</span>old_man.자치구.<span class="bu">apply</span>(<span class="kw">lambda</span> x: re.sub(<span class="vs">r&#39;성동&#39;</span>, <span class="st">&#39;중&#39;</span>, <span class="bu">str</span>(x)))</a>
-<a class="sourceLine" id="cb27-2" title="2">old_man[old_man.자치구<span class="op">==</span><span class="st">&quot;중구&quot;</span>]</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb9-1" title="1">Second.읍면동명<span class="op">=</span>Second.읍면동명.<span class="bu">apply</span>(<span class="kw">lambda</span> x: re.sub(<span class="vs">r&#39;·&#39;</span>, <span class="st">&#39;.&#39;</span>, <span class="bu">str</span>(x)))</a>
+<a class="sourceLine" id="cb9-2" title="2"></a>
+<a class="sourceLine" id="cb9-3" title="3">old_man <span class="op">=</span> pd.read_csv(<span class="st">&quot;C:/Users/LEE/Desktop/presentation/data/독립변수_데이터_호식/서울시 독거노인 현황 (성별,동별) 통계_2016.txt&quot;</span>, engine<span class="op">=</span><span class="st">&quot;python&quot;</span> ,encoding<span class="op">=</span><span class="st">&quot;utf-8&quot;</span>, sep<span class="op">=</span><span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb9-4" title="4"></a>
+<a class="sourceLine" id="cb9-5" title="5">old_man <span class="op">=</span> old_man[[<span class="st">&quot;동&quot;</span>, <span class="st">&quot;자치구&quot;</span>, <span class="st">&quot;합계&quot;</span>]]</a>
+<a class="sourceLine" id="cb9-6" title="6">old_man<span class="op">=</span>old_man.rename(columns<span class="op">=</span>{<span class="st">&quot;동&quot;</span>: <span class="st">&quot;읍면동명&quot;</span>})</a>
+<a class="sourceLine" id="cb9-7" title="7">old_man <span class="op">=</span> old_man.drop([<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>])</a>
+<a class="sourceLine" id="cb9-8" title="8"></a>
+<a class="sourceLine" id="cb9-9" title="9">old_man.자치구<span class="op">=</span>old_man.자치구.<span class="bu">apply</span>(<span class="kw">lambda</span> x: re.sub(<span class="vs">r&#39;성동&#39;</span>, <span class="st">&#39;중&#39;</span>, <span class="bu">str</span>(x)))</a>
+<a class="sourceLine" id="cb9-10" title="10">old_man[old_man.자치구<span class="op">==</span><span class="st">&quot;중구&quot;</span>]</a></code></pre></div>
 <pre><code>##        읍면동명 자치구     합계
 ## 20       소계  중구  5,528
 ## 21      소공동  중구     54
@@ -1876,70 +1788,19 @@ div.tocify {
 ## 68   왕십리도선동  중구    685
 ## 69  금호2.3가동  중구    654
 ## 70      옥수동  중구    596</code></pre>
-<div class="sourceCode" id="cb29"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb29-1" title="1">second_old_man <span class="op">=</span> pd.merge(Second, old_man, how<span class="op">=</span><span class="st">&#39;left&#39;</span>)</a>
-<a class="sourceLine" id="cb29-2" title="2">second_old_man <span class="op">=</span> second_old_man.rename(columns<span class="op">=</span>{<span class="st">&quot;합계&quot;</span>:<span class="st">&quot;독거노인수&quot;</span>})</a>
-<a class="sourceLine" id="cb29-3" title="3">second_old_man.head()</a></code></pre></div>
-<pre><code>##    읍면동명  자치구   선거인수  새누리당 더불어민주당 국민의당 독거노인수
-## 0   신사동  강남구  14827  4774   2817  NaN   380
-## 1  논현1동  강남구  21876  3966   4769  NaN   500
-## 2  논현2동  강남구  19063  4639   4017  NaN   409
-## 3  압구정동  강남구  22435  8301   3539  NaN   647
-## 4   청담동  강남구  24507  7366   4777  NaN   491</code></pre>
-<div class="sourceCode" id="cb31"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb31-1" title="1">buyang <span class="op">=</span> pd.read_csv(<span class="st">&quot;C:/Users/LEE/Desktop/presentation/data/독립변수_데이터_호식/서울시 부양비 및 노령화지수 (동별) 통계_2016.txt&quot;</span>, engine<span class="op">=</span><span class="st">&quot;python&quot;</span> ,encoding<span class="op">=</span><span class="st">&quot;utf-8&quot;</span>, sep<span class="op">=</span><span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)</a>
-<a class="sourceLine" id="cb31-2" title="2">buyang.head()</a></code></pre></div>
-<pre><code>##      기간  자치구    동  유년부양비  노년부양비  노령화지수
-## 0  2016   합계   합계   15.2   16.8  110.8
-## 1  2016  종로구   소계   12.2   20.6  168.2
-## 2  2016  종로구  사직동   16.5   24.0  144.8
-## 3  2016  종로구  삼청동   12.7   28.2  221.3
-## 4  2016  종로구  부암동   13.4   21.0  156.6</code></pre>
-<div class="sourceCode" id="cb33"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb33-1" title="1">buyang <span class="op">=</span> buyang.rename(columns<span class="op">=</span>{<span class="st">&quot;동&quot;</span>:<span class="st">&quot;읍면동명&quot;</span>})</a>
-<a class="sourceLine" id="cb33-2" title="2">buyang <span class="op">=</span> buyang[<span class="op">~</span>buyang.읍면동명.isin([<span class="st">&quot;소계&quot;</span>, <span class="st">&quot;합계&quot;</span>])]</a>
-<a class="sourceLine" id="cb33-3" title="3">buyang<span class="op">=</span>buyang.drop(<span class="st">&quot;기간&quot;</span>, axis<span class="op">=</span><span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb33-4" title="4">buyang.head()</a></code></pre></div>
-<pre><code>##    자치구 읍면동명  유년부양비  노년부양비  노령화지수
-## 2  종로구  사직동   16.5   24.0  144.8
-## 3  종로구  삼청동   12.7   28.2  221.3
-## 4  종로구  부암동   13.4   21.0  156.6
-## 5  종로구  평창동   14.8   20.5  138.7
-## 6  종로구  무악동   20.3   19.8   97.9</code></pre>
-<div class="sourceCode" id="cb35"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb35-1" title="1">buyang.자치구<span class="op">=</span>buyang.자치구.<span class="bu">apply</span>(<span class="kw">lambda</span> x: re.sub(<span class="vs">r&#39;성동&#39;</span>, <span class="st">&#39;중&#39;</span>, <span class="bu">str</span>(x)))</a>
-<a class="sourceLine" id="cb35-2" title="2">buyang[buyang.자치구<span class="op">==</span><span class="st">&quot;중구&quot;</span>]</a></code></pre></div>
-<pre><code>##    자치구     읍면동명  유년부양비  노년부양비  노령화지수
-## 20  중구      소공동   15.6   11.2   71.6
-## 21  중구      회현동    8.5   29.7  350.0
-## 22  중구       명동    8.5   24.6  288.1
-## 23  중구       필동    9.1   19.6  215.5
-## 24  중구      장충동    9.1   16.2  178.7
-## 25  중구      광희동    8.1   23.2  285.3
-## 26  중구     을지로동    5.8   31.9  549.4
-## 27  중구     신당5동   13.1   19.2  146.8
-## 28  중구      황학동   11.6   16.7  143.6
-## 29  중구      중림동   13.2   23.7  179.6
-## 30  중구      신당동    7.9   15.8  199.8
-## 31  중구      다산동   10.9   18.9  173.2
-## 32  중구      약수동   15.1   23.6  155.7
-## 33  중구      청구동   13.7   20.7  150.9
-## 34  중구      동화동   15.9   18.1  113.5
-## 53  중구    왕십리2동   14.5   17.0  117.1
-## 54  중구      마장동   13.1   17.4  133.0
-## 55  중구      사근동    8.0   13.5  168.3
-## 56  중구     행당1동   12.6   18.0  142.4
-## 57  중구     행당2동   20.1   16.8   83.5
-## 58  중구      응봉동   21.2   18.7   88.2
-## 59  중구    금호1가동   15.4   19.9  129.4
-## 60  중구    금호4가동   17.8   18.2  102.2
-## 61  중구   성수1가1동   14.0   13.8   99.0
-## 62  중구   성수1가2동   13.4   14.6  108.7
-## 63  중구   성수2가1동   11.3   16.4  144.8
-## 64  중구   성수2가3동   11.2   16.5  146.5
-## 65  중구      송정동   11.3   15.9  140.6
-## 66  중구      용답동    9.8   17.3  177.3
-## 67  중구   왕십리도선동   15.7   15.8  100.7
-## 68  중구  금호2.3가동   15.5   18.5  119.5
-## 69  중구      옥수동   18.9   17.2   91.1</code></pre>
-<div class="sourceCode" id="cb37"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb37-1" title="1">old_man_buyang<span class="op">=</span>pd.merge(second_old_man, buyang, how<span class="op">=</span><span class="st">&#39;left&#39;</span>)</a>
-<a class="sourceLine" id="cb37-2" title="2">old_man_buyang.head()</a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb11-1" title="1">second_old_man <span class="op">=</span> pd.merge(Second, old_man, how<span class="op">=</span><span class="st">&#39;left&#39;</span>)</a>
+<a class="sourceLine" id="cb11-2" title="2">second_old_man <span class="op">=</span> second_old_man.rename(columns<span class="op">=</span>{<span class="st">&quot;합계&quot;</span>:<span class="st">&quot;독거노인수&quot;</span>})</a>
+<a class="sourceLine" id="cb11-3" title="3"></a>
+<a class="sourceLine" id="cb11-4" title="4">buyang <span class="op">=</span> pd.read_csv(<span class="st">&quot;C:/Users/LEE/Desktop/presentation/data/독립변수_데이터_호식/서울시 부양비 및 노령화지수 (동별) 통계_2016.txt&quot;</span>, engine<span class="op">=</span><span class="st">&quot;python&quot;</span> ,encoding<span class="op">=</span><span class="st">&quot;utf-8&quot;</span>, sep<span class="op">=</span><span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)</a>
+<a class="sourceLine" id="cb11-5" title="5"></a>
+<a class="sourceLine" id="cb11-6" title="6">buyang <span class="op">=</span> buyang.rename(columns<span class="op">=</span>{<span class="st">&quot;동&quot;</span>:<span class="st">&quot;읍면동명&quot;</span>})</a>
+<a class="sourceLine" id="cb11-7" title="7">buyang <span class="op">=</span> buyang[<span class="op">~</span>buyang.읍면동명.isin([<span class="st">&quot;소계&quot;</span>, <span class="st">&quot;합계&quot;</span>])]</a>
+<a class="sourceLine" id="cb11-8" title="8">buyang<span class="op">=</span>buyang.drop(<span class="st">&quot;기간&quot;</span>, axis<span class="op">=</span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb11-9" title="9"></a>
+<a class="sourceLine" id="cb11-10" title="10">buyang.자치구<span class="op">=</span>buyang.자치구.<span class="bu">apply</span>(<span class="kw">lambda</span> x: re.sub(<span class="vs">r&#39;성동&#39;</span>, <span class="st">&#39;중&#39;</span>, <span class="bu">str</span>(x)))</a>
+<a class="sourceLine" id="cb11-11" title="11"></a>
+<a class="sourceLine" id="cb11-12" title="12">old_man_buyang<span class="op">=</span>pd.merge(second_old_man, buyang, how<span class="op">=</span><span class="st">&#39;left&#39;</span>)</a>
+<a class="sourceLine" id="cb11-13" title="13">old_man_buyang.head()</a></code></pre></div>
 <pre><code>##    읍면동명  자치구   선거인수  새누리당 더불어민주당 국민의당 독거노인수  유년부양비  노년부양비  노령화지수
 ## 0   신사동  강남구  14827  4774   2817  NaN   380   15.8   19.1  121.3
 ## 1  논현1동  강남구  21876  3966   4769  NaN   500    7.2   12.4  172.1
