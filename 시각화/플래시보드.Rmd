@@ -1,0 +1,126 @@
+---
+title: "Computational Documents"
+subtitle: "Html Widgets: leaflet & crosstalk"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    theme: lumen
+    source_code: embed
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(geojsonio)
+library(crosstalk)
+library(leaflet)
+library(d3scatter)
+library(DT)
+
+election  = geojsonio::geojson_read("predict_2020.json", what = "sp")
+election@data = election@data %>%
+  mutate(소득 = (소득*0.0001) %>% round, 노령화지수 = 노령화지수 %>% round)
+
+colnames(election@data) = colnames(election@data) %>% str_replace(" ","")
+
+pal = colorFactor(c("#0D7440", "#2A88C5",  "#C10D0D"), c("국민의당", "더민주","자유한국당"))
+
+# 툴팁에 담을 정보 생성
+labs = lapply(seq(nrow(election@data)), function(i) {
+  paste0( '', election@data[i, "선거구"]," : ",election@data[i, "읍면동명"], '', 
+          "당선 : ", election@data[i, "당선"], '', 
+          "국민의당 : ", election@data[i, "국민의당"],'', 
+          "더민주 : ", election@data[i, "더민주"], '',
+          "자유한국당 : ", election@data[i, "자유한국당"], '') 
+})
+
+# 선거구 경계 생성
+election_gu = maptools::unionSpatialPolygons(election, election$선거구)
+
+shared_elec = SharedData$new(election)
+shared_elec_df = SharedData$new(election@data, group=shared_elec$groupName())
+shared_elec_dt = crosstalk::SharedData$new(election@data %>%
+                 select(선거구,당선,읍면동명,소득,노령화지수, 자유한국당, 더민주), group=shared_elec$groupName())
+```
+
+Inputs {.sidebar data-width=400}
+-----------------------------------------------------------------------
+
+
+.input {
+  padding: 50%;
+}
+
+
+
+### 대한민국 제21대 총선 예측
+
+서울특별시 지역구 예측 결과
+
+```{r}
+filter_checkbox("당선", "당선", shared_elec_df, ~당선, inline=T)
+filter_slider("소득", "소득(만 원)", shared_elec_df, ~소득, width="75%")
+filter_slider("노령화지수", "노령화지수", shared_elec_df, ~노령화지수, width="75%")
+filter_select("행정동", "행정동", shared_elec_df, ~읍면동명)
+filter_select("선거구", "선거구", shared_elec_df, ~선거구)
+```
+
+---
+
+**Contact:**
+
+- lhmlhm1111@naver.com
+
+
+**Github Repo:**
+
+- [국회의원 선거 예측](https://github.com/lhmlhm1111/Data_GongHak), 연세대학교 데이터공학 4달러
+
+
+**Reference:**
+
+- [Gapminder data using crosstalk](https://rpubs.com/rcatlord/gapminder_crosstalk_updated)
+- [flexdashboard](https://rmarkdown.rstudio.com/flexdashboard/layouts.html)
+- [Special Thanks to JHGAN](https://jhgan00.github.io/)
+
+
+Column {data-height=450}
+-------------------------------------
+
+### DataTable
+
+```{r table}
+DT::datatable(shared_elec_dt, width="100%")
+```
+
+
+Column {data-height=450}
+-------------------------------------
+
+### Map
+
+```{r map}
+leaflet(shared_elec) %>%
+  addProviderTiles("CartoDB.Positron") %>% 
+  setView(126.982, 37.5502, zoom=10) %>%
+  addPolygons(
+    fillColor = ~pal(당선),
+    weight = 1,
+    opacity = 1,
+    color = "white",
+    dashArray=3,
+    fillOpacity = 0.5,
+    label = lapply(labs, htmltools::HTML)) %>%
+  addLegend(pal = pal, values = ~당선, opacity = 0.7, title = NULL, position = "bottomright") %>%
+  addPolylines(
+    data=election_gu,
+    weight = 1.5,
+    opacity = 1,
+    color = "black")
+```
+
+
+### Plot
+
+```{r plot}
+d3scatter(shared_elec_df, ~소득, ~노령화지수, ~당선, width="100%", height=250)
+```
