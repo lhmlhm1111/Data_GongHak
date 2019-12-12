@@ -38,14 +38,14 @@ knitr::opts_chunk$set(echo = TRUE)
 정량적인 데이터를 사용해야 하기 때문에, 선거에 통용되는 통설들은 배제하고 수치화 할 수 있는 데이터들을 수집했습니다.
 
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 library(tidyverse)
 library(readr)
 library(reticulate)
 ```
 
 
-```{r}
+```{r warning=FALSE, message=FALSE}
 data<-read_csv(file="https://raw.githubusercontent.com/lhmlhm1111/Data_GongHak/master/2008_oldage.csv")
 
 data %>%
@@ -70,7 +70,7 @@ _데이터수집예시_
 
 
 
-```{python}
+```{python warning=FALSE, message=FALSE}
 import pandas as pd
 import numpy as np
 import os
@@ -92,7 +92,7 @@ gangnamgap.head()
 
 ```      
 
-```{python}
+```{python warning=FALSE, message=FALSE}
 os.chdir("C:/Users/LEE/Desktop/presentation/data")
 filelist = os.listdir("seoul")[1:]
 first = gangnamgap
@@ -135,12 +135,40 @@ buyang.자치구=buyang.자치구.apply(lambda x: re.sub(r'성동', '중', str(x
 
 old_man_buyang=pd.merge(second_old_man, buyang, how='left')
 old_man_buyang.head()
+
 ```
 
 비슷한 방식으로 다른 독립변수들도 모두 전처리를 해주었습니다.
 
+여기까진 데이터를 단순히 전처리하는 과정이었습니다.
+
+그 결과 결측치를 처리할 수 없었기 때문에, 아래와 같이 결측치를 처리해주었습니다.
+
+
+```{python}
+import pandas as pd
+election_2016=pd.read_csv("https://raw.githubusercontent.com/lhmlhm1111/Data_GongHak/master/%EC%A0%84%EC%B2%98%EB%A6%AC_1101(%EC%88%98%EC%A0%95).csv")
+election_2016["독거노인수"]=election_2016["독거노인수"].apply(lambda x : int(str(x).replace(",", "")))
+election_2016["기초수급자인원수"]=election_2016["기초수급자인원수"].apply(lambda x : int(str(x).replace(",", "")))
+election_2016["사업체수"]=election_2016["사업체수"].apply(lambda x : int(str(x).replace(",", "")))
+election_2016["종사자수"]=election_2016["종사자수"].apply(lambda x : int(str(x).replace(",", "")))
+election_2016["금융기관"]=election_2016["금융기관"].fillna(election_2016['금융기관'].median())
+election_2016["보육시설"]=election_2016["보육시설"].apply(lambda x : str(x))
+election_2016["보육시설"]=election_2016["보육시설"].replace("nan", 0)
+election_2016["보육시설"]=election_2016["보육시설"].apply(lambda x : int(str(x).replace(",", "")))
+election_2016["보육시설"]=election_2016["보육시설"].replace(0, election_2016['보육시설'].median())
+election_2016["사업체 평균연령"]=election_2016["사업체 평균연령"].fillna(election_2016['사업체 평균연령'].median())
+election_2016["장애등급"]=election_2016["장애등급"].fillna(election_2016['장애등급'].median())
+election_2016["국민의당"]=election_2016["국민의당"].fillna(0)
+election_2016=election_2016.drop("Unnamed: 0", axis=1)
+election_2016["새누리당"]=election_2016["새누리당"].fillna(0)
+election_2016
+```
+
+
+
 최종적으로 전처리 한 데이터의 모습입니다.
-```{r}
+```{r warning=FALSE, message=FALSE}
 data<-read_csv(file="https://raw.githubusercontent.com/lhmlhm1111/Data_GongHak/master/data/11-22totaldata.csv")
 
 data %>%
@@ -148,4 +176,112 @@ data %>%
   DT::formatRound(2:6, digits=0)
 ```
 
+# 모델링
+
+
+
+## 시작-데이터프레임불러오기 
+```{r warning=FALSE, message=FALSE}
+# 인코딩 문제를 해결하는 두가지 방법
+## 1 csv파일 인코딩을 ANSI로 저장
+df1=read.csv('https://github.com/lhmlhm1111/Data_GongHak/raw/master/%EC%A0%84%EC%B2%98%EB%A6%AC/%EC%86%8C%EB%93%9D%EB%B0%98%EC%98%81%EC%B5%9C%EC%A2%85.csv',header=T, sep=',')
+
+## 2 readAny 패키지 활용
+
+library (devtools)
+
+# 패키지를 로드합니다.
+library(readAny)
+df2= read.any('https://github.com/lhmlhm1111/Data_GongHak/raw/master/%EC%A0%84%EC%B2%98%EB%A6%AC/%EC%86%8C%EB%93%9D%EB%B0%98%EC%98%81%EC%B5%9C%EC%A2%85.csv', header=T, sep=',')
+
+
+```
+
+## 데이터프레임 선형모델, 분산 분석, 각 독립변수 유의수준 유의성 검정
+
+```{r warning=FALSE, message=FALSE}
+attach (df1)
+names (df1)
+
+
+model3 <- aov(새누리당~독거노인수+유년부양비+노년부양비+노령화지수+사업체수+종사자수+사업체.창업률+기초수급자인원수+보육시설+금융기관+사업체.평균연령+인구+면적+인구밀도+ 소득)
+summary(model3)
+  model4 <-lm(새누리당~독거노인수+유년부양비+노년부양비+노령화지수+사업체수+종사자수+사업체.창업률+기초수급자인원수+보육시설+금융기관+사업체.평균연령+인구+면적+인구밀도+ 소득)
+summary(model4)
+```
+ 
+## 변수 중요도 파악, 변수선택 
+```{r warning=FALSE, message=FALSE}
+
+library(reticulate)
+use_python("/usr/bin/python3") # Change accordingly to your Python version
+matplotlib <- import("matplotlib")
+matplotlib$use("Agg", force = TRUE)
+```
+
+
+```{python}
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+
+#원본 데이터 호출 (깃허브에 저장된 데이터 파일 호출)
+df4 = pd.read_csv('https://github.com/lhmlhm1111/Data_GongHak/raw/master/11-22totaldata.txt', encoding='utf-8', sep=',')
+
+#학습 데이터 생성
+train1 = df4.drop(df4.index[:250],axis=0)
+train1.x = train1.drop(['year','읍면동명','자치구','새누리당','더불어민주당','국민의당'],axis=1)
+train1.y = train1['새누리당']
+
+#테스트 데이터 생성
+test1 = df4.drop(df4.index[250:],axis=0)
+test1.x = test1.drop(['year','읍면동명','자치구','새누리당','더불어민주당','국민의당'],axis=1)
+test1.y = test1['새누리당']
+
+
+## 랜덤포레스트 회귀 모델 생성&적용
+rf1 = RandomForestRegressor()
+
+rf1.fit(train1.x,train1.y)
+
+predicted = rf1.predict(test1.x)
+rf1.feature_importances_
+
+
+```
+
+ + 상호관계 다중공선성
+
+ 
+```{python}
+import PyQt5
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
+#가공할 데이터 호출
+data = pd.read_csv('https://github.com/lhmlhm1111/Data_GongHak/raw/master/11-22totaldata.txt',encoding='UTF-8',sep=',')
+
+#데이터 가공 : 변수 선별 (제외할 변수)
+df3 = data.drop(['year','읍면동명','자치구','선거인수','인구'],axis=1)
+#상관계수 분포 지도 (Heat Map) 작성
+plt.rc('font', family='batang')
+
+fig = plt.figure(figsize=[20,20])
+
+ax=sns.heatmap(df3.corr(),annot=True,square=True)
+plt.title('변수 간 상관관계')
+plt.show()
+```
+
+## 모델 적용 
+
+# 시각화
+
+# 
 
