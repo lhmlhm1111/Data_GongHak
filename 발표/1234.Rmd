@@ -1,0 +1,367 @@
+---
+title: "Election"
+author: "4dollar"
+date: "2019년 12월 13일"
+output:
+  html_document: 
+    toc: yes
+    toc_float: true
+    highlight: tango
+    code_folding: show
+    number_section: true
+    self_contained: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 개요
+
+## 주제선정이유
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(leaflet)
+mymap = leaflet() %>% addTiles()
+
+election  = geojsonio::geojson_read("election.json", what = "sp")
+
+# 지도에 색을 입히기 위해서 파레트 생성
+pal = colorFactor(c("#0D7440", "#2A88C5",  "#C10D0D"), c("국민의당", "더불어민주당","새누리당"))
+
+# 툴팁에 담을 정보 생성
+labs = lapply(seq(nrow(election@data)), function(i) {
+  paste0( '<p><b>', election@data[i, "선거구"]," : ",election@data[i, "읍면동명"], '</b></p><p>', 
+          "<b>당선 : ", election@data[i, "당선"], '</b><p></p>', 
+          "국민의당 : ", election@data[i, "국민의당"],'</p><p>', 
+          "더불어민주당 : ", election@data[i, "더불어민주당"], '</p><p>',
+          "새누리당 : ", election@data[i, "새누리당"], '</p>') 
+})
+
+# 선거구 경계 생성
+election_gu = maptools::unionSpatialPolygons(election, election$선거구)
+
+poly2 = leaflet(election) %>%
+  addTiles %>%
+  addPolygons(
+    # 폴리곤 내부
+    fillColor = ~pal(당선), fillOpacity = 0.5,
+    # 폴리곤 경계
+    weight = 1, opacity = 1, color = "white", dashArray=3,
+    # 라벨
+    label=lapply(labs, htmltools::HTML),
+    # 하이라이트
+    highlightOptions = highlightOptions(
+      color = "#00ff00", opacity = 1, weight = 2, fillOpacity = 1,
+      bringToFront = T, sendToBack = T))%>%
+  addLegend(pal = pal, values = ~당선, opacity = 0.7, title = NULL, position = "bottomright") %>%
+  addPolylines(
+    data=election_gu,
+    weight = 1.5,
+    opacity = 1,
+    color = "black")
+
+crosstalk::bscols(poly2)
+
+```
+
+
+단순히 생각해도, 투표에 영향을 주는 요소는 무수히 많습니다. 
+
+그렇다면 '과연 어떠한 요소가 실질적으로 투표에 영향을 줄까?'
+
+이러한 의문으로 시작하여 저희 조는 투표에 영향을 줄 만한 변수들을 생각해봤고, 그 변수들을 이용하여 다음 총선을 예측해보기로 하였습니다. 
+
+
+## 데이터 수집과정
+
+
+정량적인 데이터를 사용해야 하기 때문에, 선거에 통용되는 통설들은 배제하고 수치화 할 수 있는 데이터들을 수집했습니다.
+
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(readr)
+library(reticulate)
+```
+
+
+```{r warning=FALSE, message=FALSE}
+data<-read_csv(file="https://raw.githubusercontent.com/lhmlhm1111/Data_GongHak/master/2008_oldage.csv")
+
+data %>%
+  DT::datatable() %>%
+  DT::formatRound(2:6, digits=0)
+```
+_데이터수집예시_
+
+
+비슷한 과정으로 수치화 할 수 있는 데이터를 최대한 수집했습니다.
+
+![데이터수집목록](https://i.imgur.com/SLc4MWk.png)
+
+
+
+데이터 수집은 [서울시열린데이터광장](https://data.seoul.go.kr)을 참고하였습니다.
+![서울시열린데이터광장](https://i.imgur.com/2QKAKy1.png)
+
+# 전처리과정
+
+앞서 모은 데이터들을 활용하기 위해서 전처리 하는 과정을 거쳤습니다.
+
+
+
+```{python warning=FALSE, message=FALSE}
+import pandas as pd
+import numpy as np
+import os
+import re
+
+gangnamgap = pd.read_excel("https://github.com/lhmlhm1111/Data_GongHak/raw/master/data/seoul/%EA%B0%9C%ED%91%9C%EC%83%81%ED%99%A9(%ED%88%AC%ED%91%9C%EA%B5%AC%EB%B3%84)_%EA%B0%95%EB%82%A8%EA%B5%AC%EA%B0%91.xlsx")
+header = gangnamgap.iloc[2,:4]
+
+a = pd.Series(gangnamgap.iloc[3,4:].values)
+
+a = a.apply(lambda x: str(x).split("\n")[0])
+
+a = a[(a!="")&(a!="nan")]
+
+gangnamgap = gangnamgap[gangnamgap['Unnamed: 1']=="소계"]
+gangnamgap = gangnamgap.iloc[:,:len(a)+3]
+gangnamgap.columns = np.append(header,a[:-1])
+gangnamgap.head()
+
+```      
+
+```{python warning=FALSE, message=FALSE}
+os.chdir("C:/Users/JW/Desktop/presentation/data")
+filelist = os.listdir("seoul")[1:]
+first = gangnamgap
+gangnamgap['자치구'] = "강남구"
+for file in filelist:
+    data=pd.read_excel(f'seoul/{file}')
+    a=pd.Series(data.iloc[3,4:].values)
+    a = a.apply(lambda x: str(x).split("\n")[0])
+    a = a[(a!="")&(a!="nan")]
+    data = data[data['Unnamed: 1']=="소계"]
+    data = data.iloc[:,:len(a)+3]
+    data.columns = np.append(header,a[:-1])
+    gu = re.findall("_\w+구", file)[0][1:]
+    data['자치구'] = gu
+    first = first.append(data, sort=False)
+
+Second = first[["읍면동명","자치구", "선거인수", "새누리당", "더불어민주당", "국민의당"]]
+Second.읍면동명=Second.읍면동명.apply(lambda x: re.sub(r'제', '', str(x)))
+Second.읍면동명=Second.읍면동명.apply(lambda x: re.sub(r'·', '.', str(x)))
+
+old_man = pd.read_csv("https://github.com/lhmlhm1111/Data_GongHak/raw/master/data/%EB%8F%85%EB%A6%BD%EB%B3%80%EC%88%98_%EB%8D%B0%EC%9D%B4%ED%84%B0_%ED%98%B8%EC%8B%9D/%EC%84%9C%EC%9A%B8%EC%8B%9C%20%EB%8F%85%EA%B1%B0%EB%85%B8%EC%9D%B8%20%ED%98%84%ED%99%A9%20(%EC%84%B1%EB%B3%84%2C%EB%8F%99%EB%B3%84)%20%ED%86%B5%EA%B3%84_2016.txt", engine="python" ,encoding="utf-8", sep="\t")
+
+old_man = old_man[["동", "자치구", "합계"]]
+old_man=old_man.rename(columns={"동": "읍면동명"})
+old_man = old_man.drop([0,1,2])
+
+old_man.자치구=old_man.자치구.apply(lambda x: re.sub(r'성동', '중', str(x)))
+old_man[old_man.자치구=="중구"]
+
+second_old_man = pd.merge(Second, old_man, how='left')
+second_old_man = second_old_man.rename(columns={"합계":"독거노인수"})
+
+buyang = pd.read_csv("https://github.com/lhmlhm1111/Data_GongHak/raw/master/data/%EB%8F%85%EB%A6%BD%EB%B3%80%EC%88%98_%EB%8D%B0%EC%9D%B4%ED%84%B0_%ED%98%B8%EC%8B%9D/%EC%84%9C%EC%9A%B8%EC%8B%9C%20%EB%B6%80%EC%96%91%EB%B9%84%20%EB%B0%8F%20%EB%85%B8%EB%A0%B9%ED%99%94%EC%A7%80%EC%88%98%20(%EB%8F%99%EB%B3%84)%20%ED%86%B5%EA%B3%84_2016.txt", engine="python" ,encoding="utf-8", sep="\t")
+
+buyang = buyang.rename(columns={"동":"읍면동명"})
+buyang = buyang[~buyang.읍면동명.isin(["소계", "합계"])]
+buyang=buyang.drop("기간", axis=1)
+
+buyang.자치구=buyang.자치구.apply(lambda x: re.sub(r'성동', '중', str(x)))
+
+old_man_buyang=pd.merge(second_old_man, buyang, how='left')
+old_man_buyang.head()
+
+```
+
+비슷한 방식으로 다른 독립변수들도 모두 전처리를 해주었습니다.
+
+여기까진 데이터를 단순히 전처리하는 과정이었습니다.
+
+그 결과 결측치를 처리할 수 없었기 때문에, 아래와 같이 결측치를 처리해주었습니다.
+
+
+```{python}
+import pandas as pd
+election_2016=pd.read_csv("https://raw.githubusercontent.com/lhmlhm1111/Data_GongHak/master/%EC%A0%84%EC%B2%98%EB%A6%AC_1101(%EC%88%98%EC%A0%95).csv")
+election_2016["독거노인수"]=election_2016["독거노인수"].apply(lambda x : int(str(x).replace(",", "")))
+election_2016["기초수급자인원수"]=election_2016["기초수급자인원수"].apply(lambda x : int(str(x).replace(",", "")))
+election_2016["사업체수"]=election_2016["사업체수"].apply(lambda x : int(str(x).replace(",", "")))
+election_2016["종사자수"]=election_2016["종사자수"].apply(lambda x : int(str(x).replace(",", "")))
+election_2016["금융기관"]=election_2016["금융기관"].fillna(election_2016['금융기관'].median())
+election_2016["보육시설"]=election_2016["보육시설"].apply(lambda x : str(x))
+election_2016["보육시설"]=election_2016["보육시설"].replace("nan", 0)
+election_2016["보육시설"]=election_2016["보육시설"].apply(lambda x : int(str(x).replace(",", "")))
+election_2016["보육시설"]=election_2016["보육시설"].replace(0, election_2016['보육시설'].median())
+election_2016["사업체 평균연령"]=election_2016["사업체 평균연령"].fillna(election_2016['사업체 평균연령'].median())
+election_2016["장애등급"]=election_2016["장애등급"].fillna(election_2016['장애등급'].median())
+election_2016["국민의당"]=election_2016["국민의당"].fillna(0)
+election_2016=election_2016.drop("Unnamed: 0", axis=1)
+election_2016["새누리당"]=election_2016["새누리당"].fillna(0)
+election_2016
+```
+
+
+
+최종적으로 전처리 한 데이터의 모습입니다.
+```{r warning=FALSE, message=FALSE}
+data<-read_csv(file="https://raw.githubusercontent.com/lhmlhm1111/Data_GongHak/master/data/11-22totaldata.csv")
+
+data %>%
+  DT::datatable() %>%
+  DT::formatRound(2:6, digits=0)
+```
+
+
+
+# 모델링
+
+
+
+## 시작-데이터프레임불러오기 
+```{r read_csv_problems, warning=FALSE, message=FALSE}
+# 인코딩 문제를 해결하는 두가지 방법
+## 1 csv파일 인코딩을 ANSI로 저장
+df1=read.csv('https://github.com/lhmlhm1111/Data_GongHak/raw/master/%EC%A0%84%EC%B2%98%EB%A6%AC/%EC%86%8C%EB%93%9D%EB%B0%98%EC%98%81%EC%B5%9C%EC%A2%85.csv',header=T, sep=',')
+
+## 2 readAny 패키지 활용
+
+library (devtools)
+
+# 패키지를 로드합니다.
+library(readAny)
+df2= read.any('https://github.com/lhmlhm1111/Data_GongHak/raw/master/%EC%A0%84%EC%B2%98%EB%A6%AC/%EC%86%8C%EB%93%9D%EB%B0%98%EC%98%81%EC%B5%9C%EC%A2%85.csv', header=T, sep=',')
+
+
+```
+
+## 데이터프레임 선형모델, 분산 분석, 각 독립변수 유의수준 유의성 검정
+
+```{r F-test, warning=FALSE, message=FALSE}
+attach (df1)
+names (df1)
+options("scipen" = 100)
+
+model3 <- aov(새누리당~독거노인수+유년부양비+노년부양비+노령화지수+사업체수+종사자수+사업체.창업률+기초수급자인원수+보육시설+금융기관+사업체.평균연령+인구+면적+인구밀도+ 소득)
+summary(model3)
+  model4 <-lm(새누리당~독거노인수+유년부양비+노년부양비+노령화지수+사업체수+종사자수+사업체.창업률+기초수급자인원수+보육시설+금융기관+사업체.평균연령+인구+면적+인구밀도+ 소득)
+summary(model4)
+```
+ 
+## 변수 중요도 파악, 변수선택 
+
+
+```{r}
+library(reticulate)
+```
+
+```{python multivariate selection2} 
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+from sklearn.datasets import make_regression
+from sklearn.model_selection import train_test_split
+#원본 데이터 호출 (깃허브에 저장된 데이터 파일 호출)
+df4 = pd.read_csv('https://github.com/lhmlhm1111/Data_GongHak/raw/master/11-22totaldata.txt', encoding='utf-8', sep=',')
+
+#train, test 데이터 생성
+X, y = df4.iloc[:,8:], df4.iloc[:,4]
+
+
+import warnings
+warnings.filterwarnings("ignore")
+
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2, random_state=0)
+
+
+## 랜덤포레스트 회귀 모델 생성&적용
+rf = RandomForestRegressor()
+
+rf.fit(X_train,y_train)
+
+predicted = rf.predict(X_test)
+rf.feature_importances_
+['{:f}'.format(x) for x in rf.feature_importances_]
+
+```
+
+ + 상호관계 다중공선성
+
+ 
+```{python multicollinearity}
+import PyQt5
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
+
+
+#가공할 데이터 호출
+data = pd.read_csv('https://github.com/lhmlhm1111/Data_GongHak/raw/master/11-22totaldata.txt',encoding='UTF-8',sep=',')
+
+#데이터 가공 : 변수 선별 (제외할 변수)
+df3 = data.drop(['year','읍면동명','자치구','선거인수','인구'],axis=1)
+#상관계수 분포 지도 (Heat Map) 작성
+plt.rc('font', family='batang')
+
+fig = plt.figure(figsize=[20,20])
+
+ax=sns.heatmap(df3.corr(),annot=True,square=True)
+plt.title('변수 간 상관관계')
+plt.show()
+```
+
+최종적으로 소득 , 인구밀도 , 사업체수 , 장애등급별 장애인현황 ,독거노인수 , 노령화지수 선택
+
+## 모델 선택 및 적용
+
+[모델 선택과정](https://github.com/lhmlhm1111/Data_GongHak/blob/master/%EC%97%AC%EB%9F%AC%EA%B0%80%EC%A7%80_%EB%AA%A8%EB%8D%B8_%EB%8F%8C%EB%A0%A4%EB%B3%B8_%EA%B2%B0%EA%B3%BC.ipynb)
+
+
+[최신 자료 예측 결과](https://github.com/lhmlhm1111/Data_GongHak/blob/master/%EB%AA%A8%EB%8D%B8/final_%EC%B5%9C%EC%A2%85_%EC%83%88%EB%88%84%EB%A6%AC%EB%8B%B9%2B%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.ipynb)
+
+# 결론
+
+## 시각화
+
+[시각화](https://dsrla123.github.io/data_engineering/product.html)
+
+## 한계&제언 - 앞으로 
+ 변수변환, hyperparameter tuning 등의 미흡함.관측점 자체의 독립성?
+ 앞으로 다음 학기 경선 후 후보자 발표되면 후보자의 관한 요인, 시국 여론 정보 (krvote 웹 크롤링부분 참고)추가, 그 이후 지역구 코드 활용해서 서울 이외의 지역까지 확장 가능?
+```{python 1:1 relation example}
+import pandas as pd
+import numpy as np
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+df1 = pd.read_csv('https://github.com/lhmlhm1111/Data_GongHak/raw/master/%EB%AA%A8%EB%8D%B8/12%2C16%EB%85%84%EB%8F%84_Training_Data_set_1.csv',encoding='UTF-8',sep=',')
+x = '소득(동별)'
+k=15
+for i in range(k):
+    df1.loc[(df1[x] >= (df1[x].max()-df1[x].min())/k*i ) & (df1[x] <= (df1[x].max()-df1[x].min())/k*(i+1) ) ,x] = i+1
+
+plt.rc('font', family='Malgun Gothic')
+fig = plt.figure(figsize=[16,16])
+ax1 = fig.add_subplot(1,1,1)
+ax1 = sns.barplot(x,y='새누리당',data=df1.groupby(x)['새누리당'].mean().reset_index())
+plt.title('소득-새누리득표수')
+plt.show()
+```
+
+# 질의
+ 
+
