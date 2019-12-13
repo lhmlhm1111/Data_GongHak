@@ -64,7 +64,7 @@ poly2 = leaflet(election) %>%
     opacity = 1,
     color = "black")
 
-crosstalk::bscols(poly1, poly2)
+crosstalk::bscols(poly2)
 
 ```
 
