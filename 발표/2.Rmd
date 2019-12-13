@@ -112,7 +112,7 @@ data = pd.read_csv('https://github.com/lhmlhm1111/Data_GongHak/raw/master/11-22t
 #데이터 가공 : 변수 선별 (제외할 변수)
 df3 = data.drop(['year','읍면동명','자치구','선거인수','인구'],axis=1)
 #상관계수 분포 지도 (Heat Map) 작성
-plt.rc('font', family='batang')
+plt.rc('font', family='Malgun gothic')
 
 fig = plt.figure(figsize=[20,20])
 
@@ -134,7 +134,7 @@ plt.show()
 
 ## 시각화
 
-[시각화](https://dsrla123.github.io/data_engineering/%ED%94%8C%EB%9E%98%EC%8B%9C%EB%B3%B4%EB%93%9C.html)
+[시각화](https://dsrla123.github.io/data_engineering/product.html)
 
 ## 한계&제언 - 앞으로 
  변수변환, hyperparameter tuning 등의 미흡함.관측점 자체의 독립성?
